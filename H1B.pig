@@ -1,0 +1,12 @@
+h1b_list = LOAD 'h1b.csv' USING org.apache.pig.piggybank.storage.CSVExcelStorage() AS (CASE_STATUS, EMPLOYER_NAME, SOC_NAME, JOB_TITLE, FULL_TIME, PREVAILING_WAGE, YEAR, WORKSITE, lon, lat);
+h1b_group = GROUP h1b_list BY YEAR;
+DESCRIBE h1b_group;
+h1b_year_count = FOREACH h1b_group GENERATE group, COUNT(h1b_list) AS COUNTH1B;
+sorted_count_year = ORDER h1b_year_count BY $1 DESC;
+Dump sorted_count_year;
+h1b_company = GROUP h1b_list BY (EMPLOYER_NAME,YEAR,CASE_STATUS);
+h1b_company_count = FOREACH h1b_company GENERATE group, COUNT(h1b_list) AS company_count;
+sorted_count = ORDER h1b_company_count BY $1 DESC;
+DUMP sorted_count;
+Limit_count = LIMIT sorted_count == 5;
+STORE sorted_count INTO ‘employer1_hdfs’;
